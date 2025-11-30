@@ -1,0 +1,44 @@
+﻿<Page x:Class="PddTrainingApp.Views.ModulesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Разделы ПДД">
+    <Grid Background="#f5f5f5">
+        <ScrollViewer Cursor="">
+            <StackPanel Margin="20">
+                <!-- Кнопка назад -->
+                <Button Content="← Назад в личный кабинет" Click="BackButton_Click"
+                        Background="Transparent" Foreground="#007ACC" 
+                        Padding="10,5" FontSize="14" HorizontalAlignment="Left"
+                        BorderThickness="0" Cursor="Hand" Margin="0,0,0,10"/>
+
+                <TextBlock Text="Разделы ПДД" FontSize="24" FontWeight="Bold" 
+                           Margin="0,0,0,20" Foreground="#333"/>
+
+                <!-- ItemsControl для модулей -->
+                <ItemsControl x:Name="ModulesItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="White" Margin="0,0,0,15" 
+                                    Padding="20" CornerRadius="10" 
+                                    BorderThickness="1" BorderBrush="#ddd">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" 
+                                               FontSize="18" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Description}" 
+                                               FontSize="14" Foreground="#666" 
+                                               Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                    <Button Content="Начать обучение" 
+                                            Background="#28a745" Foreground="White"
+                                            Padding="15,8" Margin="0,10,0,0" 
+                                            Click="StartModule_Click"
+                                            Tag="{Binding ModuleId}"
+                                            Cursor="Hand"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

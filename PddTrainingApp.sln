@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PddTrainingApp", "PddTrainingApp\PddTrainingApp.csproj", "{2719E401-29DC-4A67-A709-352EF52AF9C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PddTrainingApp.API", "PddTrainingApp.API\PddTrainingApp.API.csproj", "{E514BC81-8087-4CFD-9839-A025D6897E2B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2719E401-29DC-4A67-A709-352EF52AF9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2719E401-29DC-4A67-A709-352EF52AF9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2719E401-29DC-4A67-A709-352EF52AF9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2719E401-29DC-4A67-A709-352EF52AF9C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E514BC81-8087-4CFD-9839-A025D6897E2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E514BC81-8087-4CFD-9839-A025D6897E2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E514BC81-8087-4CFD-9839-A025D6897E2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E514BC81-8087-4CFD-9839-A025D6897E2B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B04DD8D6-0C29-406A-BB7D-01DFC7516952}
+	EndGlobalSection
+EndGlobal
