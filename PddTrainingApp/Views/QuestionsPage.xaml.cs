@@ -66,9 +66,11 @@ namespace PddTrainingApp.Views
                     }
 
                     _questions = query
-                    .OrderBy(q => EF.Functions.Random())
-                    .Take(assignment.Block.QuestionsCount)
-                    .ToList();
+                        .Include(q => q.Options.OrderBy(o => o.OptionOrder))
+                        .Include(q => q.CorrectOption)
+                        .OrderBy(q => EF.Functions.Random())
+                        .Take(assignment.Block.QuestionsCount)
+                        .ToList();
                 }
             }
 
@@ -80,7 +82,6 @@ namespace PddTrainingApp.Views
             {
                 QuestionText.Text = "Вопросы для задания не найдены";
                 CheckAnswerButton.IsEnabled = false;
-
 
                 var backButton = new Button
                 {
@@ -106,6 +107,8 @@ namespace PddTrainingApp.Views
             {
                 _questions = context.Questions
                     .Where(q => q.ModuleId == moduleId)
+                    .Include(q => q.Options.OrderBy(o => o.OptionOrder))
+                    .Include(q => q.CorrectOption)
                     .ToList();
 
                 if (_questions.Any())
@@ -137,6 +140,7 @@ namespace PddTrainingApp.Views
         }
 
 
+
         private void ShowCurrentQuestion()
         {
             ResetCardTransformations();
@@ -147,14 +151,14 @@ namespace PddTrainingApp.Views
             OptionsPanel.Children.Clear();
             _selectedRadioButton = null;
 
-            var options = System.Text.Json.JsonSerializer.Deserialize<List<string>>(currentQuestion.Options);
+            var options = currentQuestion.Options.OrderBy(o => o.OptionOrder).ToList();
             for (int i = 0; i < options.Count; i++)
             {
                 var radioButton = new RadioButton
                 {
                     Content = new TextBlock
                     {
-                        Text = options[i],
+                        Text = options[i].OptionText,
                         TextWrapping = TextWrapping.Wrap,
                         FontSize = 14
                     },
@@ -163,7 +167,7 @@ namespace PddTrainingApp.Views
                     Background = Brushes.Transparent,
                     BorderBrush = Brushes.LightGray,
                     BorderThickness = new Thickness(1),
-                    Tag = i,
+                    Tag = options[i].OptionId, // Теперь храним OptionId
                     Cursor = System.Windows.Input.Cursors.Hand
                 };
 
@@ -209,8 +213,8 @@ namespace PddTrainingApp.Views
             }
 
             var currentQuestion = _questions[_currentQuestionIndex];
-            int selectedAnswerIndex = (int)_selectedRadioButton.Tag;
-            bool isCorrect = selectedAnswerIndex == currentQuestion.Answer;
+            int selectedOptionId = (int)_selectedRadioButton.Tag;
+            bool isCorrect = selectedOptionId == currentQuestion.Answer;
 
             ShowAnswerFeedback(isCorrect);
             CheckAnswerButton.IsEnabled = false;
@@ -267,7 +271,6 @@ namespace PddTrainingApp.Views
         private void OnAnimationCompleted(bool isCorrect)
         {
             if (isCorrect) _correctAnswers++;
-
 
             SaveResult(isCorrect);
 

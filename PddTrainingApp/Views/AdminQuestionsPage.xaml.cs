@@ -2,7 +2,6 @@
 using PddTrainingApp.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
@@ -23,15 +22,18 @@ namespace PddTrainingApp.Views
             {
                 var questions = context.Questions
                     .Include(q => q.Module)
+                    .Include(q => q.Options.OrderBy(o => o.OptionOrder))
+                    .Include(q => q.CorrectOption)
                     .ToList()
                     .Select(q => new
                     {
                         q.QuestionId,
                         q.Content,
                         q.Module,
-                        q.Answer,
-                        OptionsList = JsonSerializer.Deserialize<List<string>>(q.Options),
-                        CorrectAnswerText = $"Правильный ответ: {JsonSerializer.Deserialize<List<string>>(q.Options)[q.Answer]}"
+                        OptionsList = q.Options.OrderBy(o => o.OptionOrder).Select(o => o.OptionText).ToList(),
+                        CorrectAnswerText = q.CorrectOption != null
+                            ? $"Правильный ответ: {q.CorrectOption.OptionText}"
+                            : "Правильный ответ не указан"
                     })
                     .ToList();
 

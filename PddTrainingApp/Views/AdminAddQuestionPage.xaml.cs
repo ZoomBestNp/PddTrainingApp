@@ -1,7 +1,6 @@
 ﻿using PddTrainingApp.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
@@ -65,17 +64,44 @@ namespace PddTrainingApp.Views
 
             using (var context = new PddTrainingDbContext())
             {
+   
                 var question = new Question
                 {
                     ModuleId = (ModuleComboBox.SelectedItem as Module).ModuleId,
                     Content = QuestionText.Text,
-                    Options = JsonSerializer.Serialize(options),
-                    Answer = (CorrectAnswerComboBox.SelectedItem as ComboBoxItem).Tag as int? ?? 0,
                     DifficultyLevel = (DifficultyComboBox.SelectedItem as ComboBoxItem).Tag as int? ?? 1
                 };
 
                 context.Questions.Add(question);
-                context.SaveChanges();
+                context.SaveChanges(); 
+
+  
+                Option correctOption = null;
+                int correctAnswerIndex = (CorrectAnswerComboBox.SelectedItem as ComboBoxItem).Tag as int? ?? 0;
+
+                for (int i = 0; i < options.Count; i++)
+                {
+                    var option = new Option
+                    {
+                        QuestionId = question.QuestionId,
+                        OptionText = options[i],
+                        OptionOrder = i + 1
+                    };
+
+                    context.Options.Add(option);
+                    context.SaveChanges();
+
+                    if (i == correctAnswerIndex)
+                    {
+                        correctOption = option;
+                    }
+                }
+
+                if (correctOption != null)
+                {
+                    question.Answer = correctOption.OptionId;
+                    context.SaveChanges();
+                }
 
                 MessageBox.Show("Вопрос успешно добавлен!", "Успех");
                 NavigationService.GoBack();

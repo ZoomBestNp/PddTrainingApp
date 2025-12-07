@@ -1,8 +1,6 @@
 ﻿using PddTrainingApp.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -11,6 +9,7 @@ namespace PddTrainingApp.Views
     public partial class AdminEditQuestionPage : Page
     {
         private Question _currentQuestion;
+        private List<Option> _currentOptions = new List<Option>();
 
         public AdminEditQuestionPage(int questionId)
         {
@@ -25,26 +24,33 @@ namespace PddTrainingApp.Views
             {
                 _currentQuestion = context.Questions
                     .Include(q => q.Module)
+                    .Include(q => q.Options.OrderBy(o => o.OptionOrder))
                     .FirstOrDefault(q => q.QuestionId == questionId);
 
                 if (_currentQuestion != null)
                 {
                     // Загружаем данные вопроса в форму
                     QuestionText.Text = _currentQuestion.Content;
+                    _currentOptions = _currentQuestion.Options.ToList();
 
                     // Загружаем варианты ответов
-                    var options = JsonSerializer.Deserialize<List<string>>(_currentQuestion.Options);
-                    Option1TextBox.Text = options[0];
-                    Option2TextBox.Text = options[1];
-                    Option3TextBox.Text = options[2];
-                    Option4TextBox.Text = options[3];
+                    if (_currentOptions.Count >= 4)
+                    {
+                        Option1TextBox.Text = _currentOptions[0].OptionText;
+                        Option2TextBox.Text = _currentOptions[1].OptionText;
+                        Option3TextBox.Text = _currentOptions[2].OptionText;
+                        Option4TextBox.Text = _currentOptions[3].OptionText;
+                    }
 
-                    //приведение типов для правильного ответа
+                    // Находим правильный ответ
+                    int correctOrder = _currentOptions.FirstOrDefault(o => o.OptionId == _currentQuestion.Answer)?.OptionOrder ?? 1;
+
+                    // Устанавливаем правильный ответ в ComboBox
                     foreach (ComboBoxItem item in CorrectAnswerComboBox.Items)
                     {
                         if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int tagValue))
                         {
-                            if (tagValue == _currentQuestion.Answer)
+                            if (tagValue == correctOrder - 1) // -1 потому что Tag хранит индекс (0-3)
                             {
                                 CorrectAnswerComboBox.SelectedItem = item;
                                 break;
@@ -52,7 +58,7 @@ namespace PddTrainingApp.Views
                         }
                     }
 
-                    //приведение типов для уровня сложности
+                    // Устанавливаем уровень сложности
                     foreach (ComboBoxItem item in DifficultyComboBox.Items)
                     {
                         if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int tagValue))
@@ -118,22 +124,61 @@ namespace PddTrainingApp.Views
 
             using (var context = new PddTrainingDbContext())
             {
-                var question = context.Questions.FirstOrDefault(q => q.QuestionId == _currentQuestion.QuestionId);
+                // Загружаем вопрос с вариантами
+                var question = context.Questions
+                    .Include(q => q.Options)
+                    .FirstOrDefault(q => q.QuestionId == _currentQuestion.QuestionId);
+
                 if (question != null)
                 {
                     question.ModuleId = (ModuleComboBox.SelectedItem as Module).ModuleId;
                     question.Content = QuestionText.Text;
-                    question.Options = JsonSerializer.Serialize(options);
 
-                    //получение значения из ComboBox
-                    if (CorrectAnswerComboBox.SelectedItem is ComboBoxItem selectedAnswerItem &&
-                        selectedAnswerItem.Tag != null &&
-                        int.TryParse(selectedAnswerItem.Tag.ToString(), out int answer))
+                    // Обновляем варианты ответов
+                    if (question.Options.Count >= 4)
                     {
-                        question.Answer = answer;
+                        var optionsList = question.Options.OrderBy(o => o.OptionOrder).ToList();
+
+                        optionsList[0].OptionText = options[0];
+                        optionsList[1].OptionText = options[1];
+                        optionsList[2].OptionText = options[2];
+                        optionsList[3].OptionText = options[3];
+                    }
+                    else
+                    {
+                        // Если вариантов нет, создаем новые
+                        context.Options.RemoveRange(question.Options);
+
+                        for (int i = 0; i < options.Count; i++)
+                        {
+                            var option = new Option
+                            {
+                                QuestionId = question.QuestionId,
+                                OptionText = options[i],
+                                OptionOrder = i + 1
+                            };
+                            context.Options.Add(option);
+                        }
+                        context.SaveChanges();
+
+                        // Перезагружаем варианты
+                        question.Options = context.Options.Where(o => o.QuestionId == question.QuestionId).ToList();
                     }
 
-                    //получение уровня сложности
+                    // Получаем правильный ответ
+                    if (CorrectAnswerComboBox.SelectedItem is ComboBoxItem selectedAnswerItem &&
+                        selectedAnswerItem.Tag != null &&
+                        int.TryParse(selectedAnswerItem.Tag.ToString(), out int answerIndex))
+                    {
+                        var correctOrder = answerIndex + 1; // +1 потому что Tag хранит индекс (0-3)
+                        var correctOption = question.Options.FirstOrDefault(o => o.OptionOrder == correctOrder);
+                        if (correctOption != null)
+                        {
+                            question.Answer = correctOption.OptionId;
+                        }
+                    }
+
+                    // Обновляем уровень сложности
                     if (DifficultyComboBox.SelectedItem is ComboBoxItem selectedDifficultyItem &&
                         selectedDifficultyItem.Tag != null &&
                         int.TryParse(selectedDifficultyItem.Tag.ToString(), out int difficulty))
@@ -160,6 +205,7 @@ namespace PddTrainingApp.Views
                     var question = context.Questions.FirstOrDefault(q => q.QuestionId == _currentQuestion.QuestionId);
                     if (question != null)
                     {
+                        // Варианты удалятся каскадно из-за настроек в контексте
                         context.Questions.Remove(question);
                         context.SaveChanges();
                         MessageBox.Show("Вопрос удален", "Успех");
