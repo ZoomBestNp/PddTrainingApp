@@ -15,7 +15,15 @@ namespace PddTrainingApp.Views
             InitializeComponent();
             LoadQuestions();
         }
+        private void ExportPage_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new ExportPage());
+        }
 
+        private void ImportPage_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new ImportPage());
+        }
         private void LoadQuestions()
         {
             using (var context = new PddTrainingDbContext())

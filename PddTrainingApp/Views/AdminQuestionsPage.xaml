@@ -19,6 +19,17 @@
         Padding="15,10" FontSize="14" FontWeight="Bold"
         HorizontalAlignment="Left" Margin="0,0,0,15" Cursor="Hand"/>
 
+                <Button Content="📤 Экспорт" Click="ExportPage_Click"
+            Background="#3498db" Foreground="White" 
+            Padding="15,10" FontSize="14" FontWeight="Bold"
+            Margin="0,0,10,0" Cursor="Hand"/>
+
+                <Button Content="📥 Импорт" Click="ImportPage_Click"
+            Background="#f39c12" Foreground="White" 
+            Padding="15,10" FontSize="14" FontWeight="Bold"  Margin="0,0,10,0"
+            Cursor="Hand"/>
+
+
                 <!-- Список вопросов -->
                 <Border Background="White" Padding="15" CornerRadius="10">
                     <StackPanel>
